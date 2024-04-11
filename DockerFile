@@ -1,0 +1,16 @@
+FROM node:18
+
+RUN mkdir -p /home/node/frotas_docs_api/node_modules && chown -R node:node /home/node/frotas_docs_api
+WORKDIR /home/node/frotas_docs_api
+
+COPY package*.json ./
+
+USER node
+
+RUN yarn install
+
+COPY --chown=node:node . .
+
+EXPOSE 3001
+
+# CMD [ "node", "app.js" ]  

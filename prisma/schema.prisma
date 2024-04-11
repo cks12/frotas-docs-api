@@ -1,0 +1,571 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Filial {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  cnpj        String
+  endereco    String
+  supName     String?
+  supNumber   String?
+  status      status    @default(Ativo)
+  lat         Float?    @default(0)
+  log         Float?    @default(0)
+  cidade      String?   @default("")
+  ibge_code   String?   @default("")
+  estado      String?   @default("")
+  rua         String?   @default("")
+  bairro      String?   @default("")
+  complemento String?   @default("")
+  numero      String?   @default("")
+  cep         String?   @default("")
+  user        Usuario[]
+  cars        Carro[]
+}
+
+model Usuario {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  nome   String
+  login  String @unique
+  senha  String
+  status status
+
+  is_tech          Boolean
+  is_admin         Boolean
+  is_power_bi      Boolean
+  email            String?            @default("")
+  telefone         String?            @default("")
+  filialId         String?            @db.ObjectId
+  techId           String?            @unique @db.ObjectId
+  tech             Tecnico?           @relation(fields: [techId], references: [id])
+  filial           Filial?            @relation(fields: [filialId], references: [id])
+  Termo            Termo[]
+  oficina          oficina[]
+  Solicitacoes     Solicitacoes[]
+  Historico        Historico[]
+  Pneus            Pneus[]
+  observacaoGestor observacaoGestor[]
+  CreateOrcamento  orcamento[]        @relation(name: "createdBy")
+  UpdateOrcamento  orcamento[]        @relation(name: "updatedBy")
+}
+
+model Tecnico {
+  id                String           @id @default(auto()) @map("_id") @db.ObjectId
+  cpf               String           @unique
+  cnh               String           @unique
+  rg                String?          @default("")
+  notificationToken String           @default("")
+  telefone          String?          @default("")
+  cidade            String?          @default("")
+  ibge_code         String?          @default("")
+  estado            String?          @default("")
+  endereco          String?          @default("")
+  rua               String?          @default("")
+  bairro            String?          @default("")
+  complemento       String?          @default("")
+  numero            String?          @default("")
+  cep               String?          @default("")
+  lat               Float            @default(0)
+  log               Float            @default(0)
+  performace        performaceStatus
+  user              Usuario?
+  CNH_DOC           CNH_DOC?
+  CPF_DOC           CPF_DOC?
+  CARRO             Carro?
+  Historico         Historico[]
+  Termo             Termo[]
+  Solicitacoes      Solicitacoes[]
+
+  @@unique([cpf, id])
+  @@unique([cnh, id])
+  @@unique([cnh, cpf], name: "tech")
+}
+
+model CPF_DOC {
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  cpf    String  @unique
+  blob   String
+  techId String  @unique @db.ObjectId
+  tech   Tecnico @relation(fields: [cpf, techId], references: [cpf, id])
+
+  @@unique([cpf, techId])
+}
+
+model CNH_DOC {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  cnh            String    @unique
+  nomeTitular    String
+  dataNascimento DateTime?
+  categoria      String?
+  dataEmissao    DateTime?
+  validade       DateTime?
+  blob           String?
+  techId         String    @unique @db.ObjectId
+  tech           Tecnico   @relation(fields: [techId], references: [id])
+
+  @@unique([cnh, techId])
+}
+
+model Odometro {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  carroId      String   @db.ObjectId
+  veiculoPlaca String
+  veiculoNome  String
+  kmAtual      String
+  blob         String
+  carro        Carro?
+  updateBy     String   @default("")
+  updateId     String   @default("")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([carroId])
+}
+
+model Carro {
+  id                     String               @id @default(auto()) @map("_id") @db.ObjectId
+  modelo                 String
+  Renavam                String
+  Ano                    String
+  Placa                  String
+  is_automatico          Boolean
+  techId                 String?              @db.ObjectId
+  Chassis                String               @default("")
+  Marca                  String               @default("")
+  Cor                    String               @default("")
+  Combustivel            Combustivel          @default(Flex)
+  Performance            PacoteSeguro         @default(Performance)
+  is_ipva_pago           Boolean              @default(true)
+  data_pag_ipva          DateTime?
+  data_vencimento_ipva   DateTime?
+  is_okay                Boolean              @default(true)
+  data_pag_seg           DateTime?
+  CERT_PAG_IPVA_DOC_ID   String?              @db.ObjectId
+  CRLV_DOC_ID            String?              @db.ObjectId
+  CERT_PAG_SEGURO_DOC_ID String?              @db.ObjectId
+  CRLV_DOC               CRLV_DOC[]
+  tech                   Tecnico?             @relation(fields: [techId], references: [id])
+  status                 status
+  pecas                  CAR_PECA[]
+  Pneus                  Pneus[]
+  CERT_PAG_SEGURO_DOC    CERT_PAG_SEGURO_DOC?
+  CAR_STATUS             CAR_STATUS[]
+  Historico              Historico[]
+  Termo                  Termo[]
+  Solicitacoes           Solicitacoes[]
+  Filial                 Filial?              @relation(fields: [filialId], references: [id])
+  filialId               String?              @db.ObjectId
+  Odometro               Odometro?            @relation(fields: [odometroId], references: [id])
+  odometroId             String?              @db.ObjectId
+
+  @@unique([techId])
+  @@unique([CERT_PAG_IPVA_DOC_ID])
+  @@unique([CERT_PAG_SEGURO_DOC_ID])
+  @@unique([CRLV_DOC_ID])
+  @@unique([id, Placa])
+  @@unique([odometroId])
+}
+
+model Termo {
+  id               String      @id @default(auto()) @map("_id") @db.ObjectId
+  relator          Usuario     @relation(fields: [usuarioId], references: [id])
+  Tech             Tecnico     @relation(fields: [tecnicoId], references: [id])
+  Carro            Carro       @relation(fields: [carroId], references: [id])
+  blob             String?     @default("")
+  status           TermoStatus @default(Pendente)
+  createdAt        DateTime    @default(now())
+  updateAt         DateTime    @default(now())
+  usuarioId        String      @db.ObjectId
+  tecnicoId        String      @db.ObjectId
+  carroId          String      @db.ObjectId
+  TechCpf          String
+  TechCnh          String
+  TechCnhCategoria String
+  TechRg           String
+  TechCnhValidade  DateTime
+  TechName         String
+  CarChassi        String
+  CarPlaca         String
+  CarMarca         String
+  CarAno           String
+  CarModelo        String
+  CarCor           String
+  isAssinado       Boolean
+  relatorNome      String      @default("")
+  carPlacaTag      String
+}
+
+model Historico {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  tech        Tecnico?      @relation(fields: [tecnicoId], references: [id])
+  descricao   String
+  techName    String        @default("")
+  usuarioName String        @default("")
+  carroModelo String        @default("")
+  carroPlaca  String        @default("")
+  usuario     Usuario       @relation(fields: [usuarioId], references: [id])
+  tecnicoId   String?       @unique @db.ObjectId
+  carroId     String        @unique @db.ObjectId
+  usuarioId   String        @unique @db.ObjectId
+  tipo        HistoricoTipo
+  creatAt     DateTime      @default(now())
+  car         Carro         @relation(fields: [carroId], references: [id])
+}
+
+model CAR_STATUS {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  KmRodado           Float    @default(0)
+  have_batida        Boolean  @default(false)
+  local_batida       String   @default("")
+  farol_is_okay      Boolean  @default(true)
+  freio_is_okay      Boolean  @default(true)
+  vidro_is_okay      Boolean  @default(true)
+  direcacao_is_okay  Boolean  @default(true)
+  vidro_problema     String?  @default("")
+  direcacao_problema String?  @default("")
+  freio_problema     String?  @default("")
+  farol_problema     String?  @default("")
+  date_alinhamento   DateTime
+  is_recente         Boolean  @default(false)
+  lat                Float
+  log                Float
+  createdAt          DateTime @default(now())
+
+  Carro   Carro?  @relation(fields: [carroId], references: [id])
+  carroId String? @db.ObjectId
+}
+
+model Solicitacoes {
+  id                  String               @id @default(auto()) @map("_id") @db.ObjectId
+  kmRodado            String
+  tipo                solicitacao_tipo
+  status              solicitacao_status   @default(analise)
+  orcamentoInicial    Float                @default(0)
+  orcamentoFinal      Float                @default(0)
+  descricao           String
+  veiculoPlaca        String
+  veiculoNome         String
+  tecnicoNome         String
+  revisorNome         String?              @default("")
+  isRecusado          Boolean              @default(false)
+  orcamentoDoc        orcamentoDoc?
+  reparoLocal         String?
+  reparoJustificativa String?
+  motivoRecusa        String?              @default("")
+  revisadoPor         Usuario?             @relation(fields: [usuarioId], references: [id])
+  tecnico             Tecnico?             @relation(fields: [tecnicoId], references: [id])
+  carro               Carro                @relation(fields: [carroId], references: [id])
+  carroId             String               @db.ObjectId
+  usuarioId           String?              @db.ObjectId
+  pagoEm              DateTime?
+  createAt            DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  oficina             oficina?             @relation(fields: [oficinaId], references: [id])
+  oficinaId           String?              @db.ObjectId
+  lat                 Float                @default(0)
+  log                 Float                @default(0)
+  SolicitacoeVsPeca   SolicitacoeVsPeca[]
+  tecnicoId           String?              @db.ObjectId
+  SolicitacaoVsPneus  SolicitacaoVsPneus[]
+  observacaoGestor    observacaoGestor?
+  orcamento           orcamento[]
+}
+
+model orcamento {
+  id                String                @id @default(auto()) @map("_id") @db.ObjectId
+  solicitacao       Solicitacoes          @relation(fields: [solicitacoesId], references: [id])
+  solicitacoesId    String                @default("") @db.ObjectId
+  oficina           oficina?              @relation(fields: [oficinaId], references: [id])
+  oficinaNome       String                @default("")
+  oficinaId         String?
+  valor             Float                 @default(0)
+  blob              String?               @default("")
+  isHaveDoc         Boolean               @default(false)
+  isPago            Boolean               @default(false)
+  createdBy         Usuario               @relation(fields: [usuarioCreateId], references: [id], name: "createdBy")
+  updatedBy         Usuario               @relation(fields: [usuarioUpdateId], references: [id], name: "updatedBy")
+  createdAt         DateTime              @default(now())
+  isFinished        Boolean               @default(false)
+  updatedAt         DateTime              @updatedAt
+  usuarioUpdateId   String                @db.ObjectId
+  usuarioUpdateNome String
+  usuarioCreateId   String                @db.ObjectId
+  usuarioCreateNome String                
+  orcamentoVsPecas  orcamentoVsServicos[]
+}
+
+model orcamentoVsServicos {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  orcamento   orcamento @relation(fields: [orcamentoId], references: [id])
+  name        String    @default("")
+  valor       Float     @default(0)
+  type        String    @default("")
+  isExcluido  Boolean   @default(false)
+  orcamentoId String    @db.ObjectId
+}
+
+model observacaoGestor {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  solicitacao    Solicitacoes? @relation(fields: [solicitacoesId], references: [id])
+  text           String        @default("")
+  user           Usuario       @relation(fields: [usuarioId], references: [id])
+  solicitacoesId String        @unique @db.ObjectId
+  usuarioId      String        @db.ObjectId
+  usuarioNome    String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model SolicitacaoVsPneus {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  pneu           Pneus        @relation(fields: [pneusId], references: [id])
+  solicitacao    Solicitacoes @relation(fields: [solicitacoesId], references: [id])
+  pneusId        String       @db.ObjectId
+  solicitacoesId String       @db.ObjectId
+}
+
+model SolicitacoeVsPeca {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  solicitacao    Solicitacoes @relation(fields: [solicitacoesId], references: [id])
+  pecaName       String       @default("")
+  quantidade     Float
+  peca           Pecas        @relation(fields: [pecasId], references: [id])
+  pecasId        String       @db.ObjectId
+  solicitacoesId String       @db.ObjectId
+  isExcluido     Boolean      @default(false)
+  createdAt      DateTime?    @default(now())
+  updatedAt      DateTime?    @updatedAt
+
+  @@unique([solicitacoesId, pecasId], name: "peca_vs_solicitacao")
+}
+
+model orcamentoDoc {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  blob          String
+  Solicitacao   Solicitacoes @relation(fields: [SolicitacaoId], references: [id])
+  SolicitacaoId String       @db.ObjectId
+
+  @@unique([SolicitacaoId])
+}
+
+model CERT_PAG_SEGURO_DOC {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  blob           String
+  valor          Float          @default(0)
+  status         DocumentStatus @default(Recente)
+  dataVencimento DateTime?
+  dataPagamento  DateTime?
+  createAt       DateTime       @default(now())
+  Carro          Carro?         @relation(fields: [carroId], references: [id])
+  carroId        String?        @unique @db.ObjectId
+}
+
+model CRLV_DOC {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  blob           String
+  valor          Float          @default(0)
+  status         DocumentStatus @default(Recente)
+  dataVencimento DateTime?
+  dataPagamento  DateTime?
+  createAt       DateTime       @default(now())
+  Carro          Carro?         @relation(fields: [carroId], references: [id])
+  carroId        String?        @db.ObjectId
+}
+
+model Pneus {
+  id                 String               @id @default(auto()) @map("_id") @db.ObjectId
+  KmRodado           String               @default("")
+  marca              String               @default("")
+  aro                String               @default("")
+  numero_serie       String               @unique
+  carroPlaca         String
+  carroNome          String
+  relatorNome        String
+  relator            Usuario              @relation(fields: [usuarioId], references: [id])
+  photoId            String?              @db.ObjectId
+  status             penu_status          @default(Ativo)
+  pneu_photo         Pneu_photo?          @relation(fields: [photoId], references: [id])
+  Carro              Carro?               @relation(fields: [carroId], references: [id])
+  carroId            String?              @db.ObjectId
+  usuarioId          String               @db.ObjectId
+  updatedAt          DateTime             @updatedAt
+  createAt           DateTime             @default(now())
+  SolicitacaoVsPneus SolicitacaoVsPneus[]
+
+  @@unique([numero_serie, carroId], name: "carro_pneu_serie")
+  @@unique([photoId])
+}
+
+model Pneu_photo {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  blob         String
+  Pneus        Pneus?
+  numero_serie String
+  pneuId       String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([numero_serie, pneuId], name: "carro_pneu_photo")
+}
+
+model Pecas {
+  id                String              @id @default(auto()) @map("_id") @db.ObjectId
+  nome              String
+  peca_CategoryId   String?             @db.ObjectId
+  Peca_Category     Peca_Category?      @relation(fields: [peca_CategoryId], references: [id])
+  problem           Pecas_Problem[]
+  CAR_PECA          CAR_PECA[]
+  SolicitacoeVsPeca SolicitacoeVsPeca[]
+}
+
+model Peca_Category {
+  id    String  @id @default(auto()) @map("_id") @db.ObjectId
+  nome  String
+  pecas Pecas[]
+}
+
+model oficina {
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  nome         String         @default("")
+  cnpj         String         @default("")
+  cidade       String         @default("")
+  ibge_code    String         @default("")
+  estado       String         @default("")
+  numero       String         @default("")
+  rua          String         @default("")
+  bairro       String         @default("")
+  complemento  String         @default("")
+  endereco     String         @default("")
+  email        String         @default("")
+  telefone     String         @default("")
+  cep          String         @default("")
+  isAutorizada Boolean        @default(false)
+  solicitacoes Solicitacoes[]
+  status       status         @default(Ativo)
+  creator      Usuario        @relation(fields: [usuarioId], references: [id])
+  lat          Float
+  log          Float
+  usuarioId    String         @db.ObjectId
+  orcamento    orcamento[]
+}
+
+model Pecas_Problem {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  descricao String
+  Pecas     Pecas?  @relation(fields: [pecasId], references: [id])
+  pecasId   String? @db.ObjectId
+}
+
+model Peca_photo {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  blob     String
+  CAR_PECA CAR_PECA?
+}
+
+model CAR_PECA {
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  pecaId          String      @db.ObjectId
+  peca            Pecas       @relation(fields: [pecaId], references: [id])
+  is_original     Boolean
+  is_uso          Boolean
+  carroId         String      @db.ObjectId
+  carro           Carro       @relation(fields: [carroId], references: [id])
+  Serie           String?
+  substituicao    String?
+  photo_id        String?     @db.ObjectId
+  motivo_nao_info String?
+  peca_photo      Peca_photo? @relation(fields: [photo_id], references: [id])
+
+  @@unique([photo_id])
+}
+
+enum status {
+  Ativo
+  Desativado
+  Excluido
+}
+
+enum solicitacao_tipo {
+  Peca
+  Alinhamento
+  Reparo
+  Pneu
+  Troca_oleo
+}
+
+enum car_foto_tipo {
+  frente
+  lado_direito
+  lado_esquerdo
+  traseira
+  odometro
+}
+
+enum solicitacao_status {
+  criada
+  analise
+  recusada
+  revisao
+  aprovada
+  aguarda_nf
+  finalizada
+  aprovado_vex
+  agendado
+}
+
+enum penu_status {
+  Ativo
+  Problema
+  Descartado
+  Step
+}
+
+enum performaceStatus {
+  Bom
+  Ruim
+  Regular
+}
+
+enum Combustivel {
+  Gasolina
+  Alcool
+  Flex
+  Diesel
+}
+
+enum TermoStatus {
+  Ativo
+  Pendente
+  Inativo
+}
+
+enum PacoteSeguro {
+  Performance
+  Padrao
+}
+
+enum DocumentType {
+  crlv
+  termo
+  seguro
+}
+
+enum DocumentStatus {
+  Recente
+  Substituido
+}
+
+enum HistoricoTipo {
+  Solicitacao
+  Criacao_Documento
+  Provisionamento_Veiculo
+  Troca_Tecnico
+  Disponibilizacao_Veiculo
+}
