@@ -59,4 +59,4 @@ jobs:
           app-name: 'frotas-docs'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_03CFE707AF634E1EB8249DAE9A6920B6 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3191B58123204D869CF3DA5D81796DB4 }}
