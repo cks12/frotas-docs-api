@@ -7,7 +7,7 @@ import {apiKeyMiddleware} from './middlewares/api-key';
 import SolicitacaoRoutes from './routes/solicitacao';
 import db from './db/db';
 import * as swaggerUi from 'swagger-ui-express';
-import swaggerFile from './swagger_output.json';
+//import swaggerFile from './swagger_output.json';
 import status_router from "./routes/status";
 
 
@@ -31,7 +31,7 @@ class Server {
     }
 
     routes() {
-        this.app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile))
+        //this.app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerFile))
         this.app.use("/car", carRoute);
         this.app.use("/solicitacao", SolicitacaoRoutes)
         this.app.use("/termo", termoRoute)
