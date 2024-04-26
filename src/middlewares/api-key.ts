@@ -13,6 +13,8 @@ export const secretClient = new SecretClient(vaultUrl, credential);
 export const apiKeyMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const apiKey = req.headers['x-api-key'] as string;
     try {
+        if(req.url.includes("/docs"))
+            return next()
         if (!apiKey) {
             return res.status(401).json({ error: 'API key não fornecida' });
         }

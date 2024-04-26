@@ -238,8 +238,9 @@ model CAR_STATUS {
   log                Float
   createdAt          DateTime @default(now())
 
-  Carro   Carro?  @relation(fields: [carroId], references: [id])
-  carroId String? @db.ObjectId
+  Carro       Carro?        @relation(fields: [carroId], references: [id])
+  carroId     String?       @db.ObjectId
+  statusPhoto statusPhoto[]
 }
 
 model Solicitacoes {
@@ -297,7 +298,7 @@ model orcamento {
   usuarioUpdateId   String                @db.ObjectId
   usuarioUpdateNome String
   usuarioCreateId   String                @db.ObjectId
-  usuarioCreateNome String                
+  usuarioCreateNome String
   orcamentoVsPecas  orcamentoVsServicos[]
 }
 
@@ -423,6 +424,16 @@ model Pecas {
   problem           Pecas_Problem[]
   CAR_PECA          CAR_PECA[]
   SolicitacoeVsPeca SolicitacoeVsPeca[]
+}
+
+model statusPhoto {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  type         car_foto_tipo
+  blob         String
+  status       CAR_STATUS    @relation(fields: [cAR_STATUSId], references: [id])
+  cAR_STATUSId String        @db.ObjectId
+  userName     String
+  userId       String        @db.ObjectId
 }
 
 model Peca_Category {
