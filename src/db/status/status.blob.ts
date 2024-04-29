@@ -13,6 +13,26 @@ class StatusBlob {
         return `${blobName}`;
     }
 
+    async deleteImage(id: string){
+        const blob = await db.prisma.statusPhoto.findUnique({
+            where: {
+                id: id,
+            },
+            select: {
+                blob: true,
+            }
+        });
+
+        if (!blob)
+            throw "ERR: STATUS BLOB NOT FOUND";
+        await db.statusBlob.getBlockBlobClient(blob.blob).delete();
+        await db.prisma.statusPhoto.delete({
+            where: {
+                id: id,
+            }
+        })
+    }
+
     async getLast(id: string) {
         return db.prisma.cAR_STATUS.findFirst({
             where: {
@@ -36,7 +56,7 @@ class StatusBlob {
         const data = sendNewPhoto.parse(raw);
         const buffer = Buffer.from(data.base64, 'base64');
         const blobName = await this.createBlob(buffer, "jpg", data.tipo)
-        await db.prisma.statusPhoto.create({
+        return await db.prisma.statusPhoto.create({
             data: {
                 blob: blobName,
                 // @ts-ignore

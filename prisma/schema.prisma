@@ -155,7 +155,6 @@ model Carro {
   pecas                  CAR_PECA[]
   Pneus                  Pneus[]
   CERT_PAG_SEGURO_DOC    CERT_PAG_SEGURO_DOC?
-  CAR_STATUS             CAR_STATUS[]
   Historico              Historico[]
   Termo                  Termo[]
   Solicitacoes           Solicitacoes[]
@@ -163,6 +162,7 @@ model Carro {
   filialId               String?              @db.ObjectId
   Odometro               Odometro?            @relation(fields: [odometroId], references: [id])
   odometroId             String?              @db.ObjectId
+  car_status             CAR_STATUS?
 
   @@unique([techId])
   @@unique([CERT_PAG_IPVA_DOC_ID])
@@ -219,28 +219,18 @@ model Historico {
 }
 
 model CAR_STATUS {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  KmRodado           Float    @default(0)
-  have_batida        Boolean  @default(false)
-  local_batida       String   @default("")
-  farol_is_okay      Boolean  @default(true)
-  freio_is_okay      Boolean  @default(true)
-  vidro_is_okay      Boolean  @default(true)
-  direcacao_is_okay  Boolean  @default(true)
-  vidro_problema     String?  @default("")
-  direcacao_problema String?  @default("")
-  freio_problema     String?  @default("")
-  farol_problema     String?  @default("")
-  date_alinhamento   DateTime
-  is_recente         Boolean  @default(false)
-  lat                Float
-  log                Float
-  createdAt          DateTime @default(now())
-
-  Carro       Carro?        @relation(fields: [carroId], references: [id])
-  carroId     String?       @db.ObjectId
-  statusPhoto statusPhoto[]
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  KmRodado     Float         @default(0)
+  is_recente   Boolean       @default(false)
+  lat          Float?
+  log          Float?
+  createdAt    DateTime      @default(now())
+  createdBy    String        @default("")
+  creatorId    String        @default("")
+  nextCheckout DateTime?     @default(now())
+  Carro        Carro?        @relation(fields: [carroId], references: [id])
+  carroId      String?       @unique @db.ObjectId
+  statusPhoto  statusPhoto[]
 }
 
 model Solicitacoes {
