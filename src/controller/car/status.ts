@@ -8,7 +8,7 @@ class StatusController {
     async getImage(req: Request, res: Response) {
         try {
             const getBase64 = await statusBlob.getBase64(req.params.id);
-            res.status(200).json(getBase64);
+            return res.status(200).json(getBase64);
         } catch (err: any) {
             res.status(500).json({
                 message: err.message
