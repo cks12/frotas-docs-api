@@ -491,6 +491,7 @@ enum status {
   Ativo
   Desativado
   Excluido
+  Manu
 }
 
 enum solicitacao_tipo {
