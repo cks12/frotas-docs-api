@@ -10,6 +10,7 @@ interface SolicitacaoPhotos {
     pnenus: Photo[],
     odometro: Photo | null,
     pecas: Photo[],
+    solicitacao: Photo[]
 }
 
 class SolicitacaoPhotos {
@@ -42,7 +43,15 @@ class SolicitacaoPhotos {
             }
         });
 
+        const photos = await db.prisma.solicitacaoVsPhotos.findMany({
+            where: {
+                solicitacoesId: id
+            }
+        })
+
         response.odometro = odometro ? { id: odometro.id } : null;
+        response.odometro = odometro ? { id: odometro.id } : null;
+        response.solicitacao = photos.map(photo => ({ id: photo.id }));
         response.pnenus = solicitcao.SolicitacaoVsPneus.map(pneu => ({ id: pneu.pneu.photoId || "" }));
         return response;
     }
@@ -55,10 +64,12 @@ class SolicitacaoPhotos {
                 invalid_type_error: "TYPE_NOT_FOUND"
             },
 
-        ).refine(value => ["odometro", "pneus", "pecas"].includes(value), {
+        ).refine(value => ["odometro", "pneus", "pecas", "solicitacao"].includes(value), {
             message: "TYPE_NOT_VALID"
         }).parse(rawType);
         switch (type) {
+            case "solicitacao":
+                return this.getBase64Solicitacao(id)
             case "odometro":
                 return this.getBase64Odometro(id);
             case "pneus":
@@ -68,6 +79,19 @@ class SolicitacaoPhotos {
             default: 
                 return null;
         }
+    }
+
+    async getBase64Solicitacao(id: string): Promise<string | null> {
+        const peca = await db.prisma.solicitacaoVsPhotos.findFirst({
+            where: {
+                id: id
+            }
+        });
+        if (!peca) throw "NOT_FOUND";
+        const exists = await db.solicaoBlob.getBlobClient(peca.blob).exists();
+        if(!exists) throw "NOT_FOUND_IN_BLOB_SERVICE";
+        const blob = await db.solicaoBlob.getBlobClient(peca.blob).downloadToBuffer();
+        return `data:image/png;base64,${blob.toString("base64")}`
     }
 
     async getBase64Pecas(id: string): Promise<string | null> {

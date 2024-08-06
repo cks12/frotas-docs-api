@@ -18,6 +18,7 @@ class db {
     static solicitacaoBlob: ContainerClient;
     static statusBlob: ContainerClient;
     static carDocsContainerBlob: ContainerClient;
+    static solicaoBlob: ContainerClient;
 
     constructor() {
         this.environment = "dev";
@@ -33,6 +34,7 @@ class db {
         const odometroFotoName = await db.keyVaultClient.getSecret(`odometroFotoName`);
         const solicitacaoDocName = await db.keyVaultClient.getSecret(`solicitacaoDocName`);
         const statusFotoName = await db.keyVaultClient.getSecret(`statusFotoName`);
+        
 
         db.blobService = BlobServiceClient.fromConnectionString(blobServiceName.value || "");
         if (!pneuFotoName.value || !odometroFotoName.value || !pecasFotosName.value || !blobServiceName.value || !solicitacaoDocName.value || !statusFotoName.value)
@@ -44,6 +46,7 @@ class db {
         db.pneuBlobService = db.blobService.getContainerClient(pneuFotoName.value);
         db.solicitacaoBlob = db.blobService.getContainerClient(solicitacaoDocName.value);
         db.statusBlob = db.blobService.getContainerClient(statusFotoName.value);
+        db.solicaoBlob = db.blobService.getContainerClient("solicitacao-blob");
 
 
         await db.pneuBlobService.createIfNotExists();
@@ -52,6 +55,7 @@ class db {
         await db.solicitacaoBlob.createIfNotExists();
         await db.pecaBlob.createIfNotExists();
         await db.statusBlob.createIfNotExists();
+        await db.solicaoBlob.createIfNotExists();
     }
 }
 

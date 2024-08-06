@@ -2,6 +2,10 @@ import {sendNewPhoto} from "./status.schema";
 import db from "../db";
 import {v1 as uuidv1} from "uuid";
 
+interface ICarSituacao {
+    name: string,
+    value: boolean,
+}
 class StatusBlob {
 
     async createBlob(data: Buffer, ext: string, type: string) {
@@ -32,9 +36,9 @@ class StatusBlob {
             }
         })
     }
-
+    
     async getLast(id: string) {
-        return db.prisma.cAR_STATUS.findFirst({
+        const data =  await db.prisma.cAR_STATUS.findFirst({
             where: {
                 AND: {
                     carroId:id,
@@ -47,8 +51,10 @@ class StatusBlob {
             },
             include: {
                 statusPhoto: true,
+                car_situacao: true,
             }
-        })
+        });
+        return data;
 
     }
 

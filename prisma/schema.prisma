@@ -218,55 +218,75 @@ model Historico {
   car         Carro         @relation(fields: [carroId], references: [id])
 }
 
+model car_situacao {
+  id                 String        @id @default(auto()) @map("_id") @db.ObjectId
+  carStatusId        String        @db.ObjectId
+  car_status         CAR_STATUS    @relation(fields: [carStatusId], references: [id])
+  name               String
+  value              Boolean       @default(true)
+  problem_category   Peca_Category @relation(fields: [problem_CategoryId], references: [id])
+  problem_CategoryId String        @db.ObjectId
+}
+
 model CAR_STATUS {
-  id           String        @id @default(auto()) @map("_id") @db.ObjectId
-  KmRodado     Float         @default(0)
-  is_recente   Boolean       @default(false)
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  KmRodado     Float          @default(0)
+  is_recente   Boolean        @default(false)
   lat          Float?
   log          Float?
-  createdAt    DateTime      @default(now())
-  createdBy    String        @default("")
-  creatorId    String        @default("")
-  nextCheckout DateTime?     @default(now())
-  Carro        Carro?        @relation(fields: [carroId], references: [id])
-  carroId      String?       @unique @db.ObjectId
+  createdAt    DateTime       @default(now())
+  createdBy    String         @default("")
+  creatorId    String         @default("")
+  nextCheckout DateTime?      @default(now())
+  Carro        Carro?         @relation(fields: [carroId], references: [id])
+  carroId      String?        @unique @db.ObjectId
   statusPhoto  statusPhoto[]
+  car_situacao car_situacao[]
 }
 
 model Solicitacoes {
-  id                  String               @id @default(auto()) @map("_id") @db.ObjectId
+  id                  String                @id @default(auto()) @map("_id") @db.ObjectId
   kmRodado            String
   tipo                solicitacao_tipo
-  status              solicitacao_status   @default(analise)
-  orcamentoInicial    Float                @default(0)
-  orcamentoFinal      Float                @default(0)
+  status              solicitacao_status    @default(analise)
+  orcamentoInicial    Float                 @default(0)
+  orcamentoFinal      Float                 @default(0)
   descricao           String
   veiculoPlaca        String
   veiculoNome         String
   tecnicoNome         String
-  revisorNome         String?              @default("")
-  isRecusado          Boolean              @default(false)
+  revisorNome         String?               @default("")
+  isRecusado          Boolean               @default(false)
   orcamentoDoc        orcamentoDoc?
   reparoLocal         String?
   reparoJustificativa String?
-  motivoRecusa        String?              @default("")
-  revisadoPor         Usuario?             @relation(fields: [usuarioId], references: [id])
-  tecnico             Tecnico?             @relation(fields: [tecnicoId], references: [id])
-  carro               Carro                @relation(fields: [carroId], references: [id])
-  carroId             String               @db.ObjectId
-  usuarioId           String?              @db.ObjectId
+  motivoRecusa        String?               @default("")
+  revisadoPor         Usuario?              @relation(fields: [usuarioId], references: [id])
+  tecnico             Tecnico?              @relation(fields: [tecnicoId], references: [id])
+  carro               Carro                 @relation(fields: [carroId], references: [id])
+  carroId             String                @db.ObjectId
+  usuarioId           String?               @db.ObjectId
   pagoEm              DateTime?
-  createAt            DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  oficina             oficina?             @relation(fields: [oficinaId], references: [id])
-  oficinaId           String?              @db.ObjectId
-  lat                 Float                @default(0)
-  log                 Float                @default(0)
+  createAt            DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  oficina             oficina?              @relation(fields: [oficinaId], references: [id])
+  oficinaId           String?               @db.ObjectId
+  lat                 Float                 @default(0)
+  log                 Float                 @default(0)
   SolicitacoeVsPeca   SolicitacoeVsPeca[]
-  tecnicoId           String?              @db.ObjectId
+  tecnicoId           String?               @db.ObjectId
   SolicitacaoVsPneus  SolicitacaoVsPneus[]
   observacaoGestor    observacaoGestor?
   orcamento           orcamento[]
+  SolicitacaoVsPhotos SolicitacaoVsPhotos[]
+}
+
+model SolicitacaoVsPhotos {
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  blob           String
+  applicationId  String        @unique @default("")
+  Solicitacoes   Solicitacoes? @relation(fields: [solicitacoesId], references: [id])
+  solicitacoesId String?       @db.ObjectId
 }
 
 model orcamento {
@@ -430,6 +450,8 @@ model Peca_Category {
   id    String  @id @default(auto()) @map("_id") @db.ObjectId
   nome  String
   pecas Pecas[]
+
+  car_situacao car_situacao[]
 }
 
 model oficina {
