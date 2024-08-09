@@ -16,7 +16,7 @@ export async function UploadOrcamento(raw: upload){
     const query = upload.parse(raw);
     const buffer = Buffer.from(query.base64, 'base64');
     const blob = await createBlob(buffer, query.ext);
-    const doc = await db.prisma.orcamentoDoc.create({
+    const doc = await db.prisma.orcamentoVsDoc.create({
         data: {
             blob: blob,
             SolicitacaoId: query.solicitacaoId,
@@ -25,3 +25,12 @@ export async function UploadOrcamento(raw: upload){
 
     return doc;
 } 
+
+export async function listBySolicitacaoId(id: string){
+    const docs = await db.prisma.orcamentoVsDoc.findMany({
+        where: {
+            SolicitacaoId: id
+        }
+    });
+    return docs;
+}

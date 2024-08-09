@@ -257,7 +257,7 @@ model Solicitacoes {
   tecnicoNome         String
   revisorNome         String?               @default("")
   isRecusado          Boolean               @default(false)
-  orcamentoDoc        orcamentoDoc?
+  orcamentoDoc        orcamentoVsDoc[]
   reparoLocal         String?
   reparoJustificativa String?
   motivoRecusa        String?               @default("")
@@ -357,7 +357,7 @@ model SolicitacoeVsPeca {
   @@unique([solicitacoesId, pecasId], name: "peca_vs_solicitacao")
 }
 
-model orcamentoDoc {
+model orcamentoVsDoc {
   id            String       @id @default(auto()) @map("_id") @db.ObjectId
   blob          String
   Solicitacao   Solicitacoes @relation(fields: [SolicitacaoId], references: [id])
