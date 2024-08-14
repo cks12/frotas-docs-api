@@ -11,6 +11,7 @@ SolicitacaoRoutes.get("/list/:id", solicitacaoController.getBySolicitacaoId)
 SolicitacaoRoutes.post("/orcamento/upload", (req, res) => orcamento.upload(req, res));
 SolicitacaoRoutes.get("/orcamento/:id", orcamento.getById);
 SolicitacaoRoutes.get("/orcamento/list/:id", orcamento.list);
+SolicitacaoRoutes.get("/download/:id", orcamento.download);
 SolicitacaoRoutes.get("/:type/:id", solicitacaoController.getBase64ById);
 
 export default SolicitacaoRoutes;

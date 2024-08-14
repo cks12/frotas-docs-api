@@ -1,8 +1,19 @@
 import { Request, Response } from "express";
-import { UploadOrcamento, listBySolicitacaoId } from "../../utils/orcamentoDocs/upload";
+import { DownloadBlob, UploadOrcamento, listBySolicitacaoId } from "../../utils/orcamentoDocs/upload";
 import { getDoc } from "../../utils/orcamentoDocs/get";
 
 class OrcamentoController {
+    async download(req: Request, res: Response) {
+        try {
+            const name = req.params.id
+
+            const response = await DownloadBlob(name);
+            return res.send(response)
+        }
+        catch (err) {
+            return res.status(400).json({ "ERROR": err })
+        }
+    }
     async list(req: Request, res: Response) {
         try {
             const id = req.params.id;

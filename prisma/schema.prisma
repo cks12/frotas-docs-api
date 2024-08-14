@@ -279,6 +279,17 @@ model Solicitacoes {
   observacaoGestor    observacaoGestor?
   orcamento           orcamento[]
   SolicitacaoVsPhotos SolicitacaoVsPhotos[]
+  SolicitacoesVsDoc   SolicitacoesVsDoc[]
+}
+
+model SolicitacoesVsDoc {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  blob          String
+  Solicitacao   Solicitacoes? @relation(fields: [SolicitacaoId], references: [id])
+  SolicitacaoId String?       @default("") @db.ObjectId
+  applicationId String?       @default("")
+
+  @@unique([SolicitacaoId])
 }
 
 model SolicitacaoVsPhotos {
