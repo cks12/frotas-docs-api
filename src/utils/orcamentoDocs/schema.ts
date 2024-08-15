@@ -3,6 +3,7 @@ import { z } from "zod";
 export const upload = z.object({
     solicitacaoId: z.string(),
     base64: z.string(),
+    name: z.string().optional(),
     ext: z.string(),
 })
 

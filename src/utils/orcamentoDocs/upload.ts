@@ -25,6 +25,8 @@ export async function UploadOrcamento(raw: upload){
     const doc = await db.prisma.solicitacoesVsDoc.create({
         data: {
             blob: blob,
+            docName: query.name || "",
+            applicationId: blob,
             SolicitacaoId: query.solicitacaoId,
         }
     });

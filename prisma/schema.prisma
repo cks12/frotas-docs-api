@@ -285,6 +285,7 @@ model Solicitacoes {
 model SolicitacoesVsDoc {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   blob          String
+  docName       String?       @default("")
   Solicitacao   Solicitacoes? @relation(fields: [SolicitacaoId], references: [id])
   SolicitacaoId String?       @default("") @db.ObjectId
   applicationId String?       @default("")

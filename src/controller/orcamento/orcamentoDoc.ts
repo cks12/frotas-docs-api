@@ -6,7 +6,6 @@ class OrcamentoController {
     async download(req: Request, res: Response) {
         try {
             const name = req.params.id
-
             const response = await DownloadBlob(name);
             return res.send(response)
         }
