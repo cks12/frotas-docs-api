@@ -11,6 +11,19 @@ interface response {
 }
 
 class GetCarDocs {
+    async downloadDoc(id: string){
+        const termo = await db.prisma.carDocumentos.findFirstOrThrow({
+            where: {
+                id: id
+            },
+            select: {
+                blob: true,
+            }
+        })
+        if(!termo.blob) throw "Blob not provied"
+        const blob = await getBlob(termo.blob);
+        return blob
+    }
     async getAll(carroId: string): Promise<response[]> {
         const response: response[] = []
         const crlv = db.prisma.cRLV_DOC.findMany({
@@ -37,7 +50,16 @@ class GetCarDocs {
             orderBy: {
                 createdAt: "desc",
             }
-        })
+        });
+
+        const others = await db.prisma.carDocumentos.findMany({
+            where: {
+                carroId: carroId,
+            },
+            orderBy: {
+                createAt: "desc",
+            }
+        });
 
         const promises = [crlv, seguro];
         const result = await Promise.all([...promises]);
@@ -60,6 +82,17 @@ class GetCarDocs {
                 id: doc.id,
                 status: doc.status,
                 type: "seguro"
+            })
+        });
+
+        others.forEach(doc => {
+            response.push({
+                dataRegistro: toLocaleString(doc.createAt) || "",
+                status: "Enviado",
+                blob: doc.blob || "",
+                dataValidade: "Não aplicavel",
+                type: doc.documentoTipo,
+                id: doc.id
             })
         })
 
@@ -95,7 +128,6 @@ class GetCarDocs {
         const termos = await db.prisma.termo.findMany({})
         return termos
     }
-
     
 }
 

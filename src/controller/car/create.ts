@@ -4,6 +4,31 @@ import GetCarDocs from "../../utils/CarDocs/get";
 
 class CarDocController {
 
+    async createDoc(req: Request, res: Response){
+        const data = req.body;
+        const docs = new CreateDocsCar();
+        try{
+            const doc = await docs.createDoc(data);
+            return res.status(200).json({doc});
+        }
+        catch(err){
+            return res.status(400).json({error: err})
+        }
+    }
+
+    async download(req: Request, res: Response) {
+        const {id} = req.params;
+        const docs = new GetCarDocs();
+        try {
+            const crlv = await docs.downloadDoc(id);
+            res.setHeader('Content-Disposition', 'inline; filename=document.pdf');
+            res.setHeader('Content-Type', 'application/pdf');
+            return crlv?.pipe(res)
+        } catch (err) {
+            return res.status(400).json({error: err})
+        }
+    }
+
     async createCrlv(req: Request, res: Response) {
         const data = req.body;
         const docs = new CreateDocsCar();

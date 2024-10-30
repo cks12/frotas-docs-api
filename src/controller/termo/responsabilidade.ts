@@ -14,6 +14,16 @@ class TermoController {
         }
     };
 
+    async devolucao(req: Request, res: Response) {
+        try {
+            const createTermo = new CreateTermo();
+            return await createTermo.devolucao(res, req.body)
+        } catch (err) {
+            console.log(err);
+            return res.status(400).json({ error: err });
+        }
+    };
+
     async update(req: Request, res: Response) {
         try {
             const updateTermo = new UpdateTermo();

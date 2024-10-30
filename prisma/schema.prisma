@@ -163,6 +163,7 @@ model Carro {
   Odometro               Odometro?            @relation(fields: [odometroId], references: [id])
   odometroId             String?              @db.ObjectId
   car_status             CAR_STATUS?
+  CarDocumentos          CarDocumentos[]
 
   @@unique([techId])
   @@unique([CERT_PAG_IPVA_DOC_ID])
@@ -172,6 +173,14 @@ model Carro {
   @@unique([odometroId])
 }
 
+model CarroVsDoc {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  createBy    String
+  creatorName String
+  blob        String
+  carroId     String
+}
+
 model Termo {
   id               String      @id @default(auto()) @map("_id") @db.ObjectId
   relator          Usuario     @relation(fields: [usuarioId], references: [id])
@@ -179,6 +188,7 @@ model Termo {
   Carro            Carro       @relation(fields: [carroId], references: [id])
   blob             String?     @default("")
   status           TermoStatus @default(Pendente)
+  isDevolucao      Boolean? @default(false)
   createdAt        DateTime    @default(now())
   updateAt         DateTime    @default(now())
   usuarioId        String      @db.ObjectId
@@ -519,6 +529,17 @@ model CAR_PECA {
   peca_photo      Peca_photo? @relation(fields: [photo_id], references: [id])
 
   @@unique([photo_id])
+}
+
+model CarDocumentos {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  documentoTipo String
+  blob          String
+  createBy      String? @default("Não aplicavel")
+  creatorId     String?
+  createAt      DateTime @default(now())
+  Carro         Carro?   @relation(fields: [carroId], references: [id])
+  carroId       String?  @db.ObjectId
 }
 
 enum status {

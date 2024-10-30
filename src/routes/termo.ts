@@ -6,6 +6,7 @@ const termoDocController = new TermoController()
 const termoRoute = Router();
 
 termoRoute.post('/responsabilidade', termoDocController.create);
+termoRoute.post('/devolucao', termoDocController.create);
 termoRoute.get("/responsabilidade/:id", termoDocController.get);
 termoRoute.get('/responsabilidade', termoDocController.getAll);
 termoRoute.put('/responsabilidade', termoDocController.update);
